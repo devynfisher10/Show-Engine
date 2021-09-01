@@ -8,7 +8,7 @@ import tensorflow_hub as hub
 st.title('Tv Show Similarity Engine')
 
 # read in data
-tv_dataset = pd.read_csv("tv_dataset_final.csv")
+tv_dataset = pd.read_csv("tv_dataset_filtered.csv")
 
 # insert some graphics for visualization
 
@@ -43,22 +43,22 @@ st.subheader("Simply select a show you like and look at the suggested options!")
 
 
 # filtering to key shows
-tv_dataset = tv_dataset[(tv_dataset["numVotes"] > 7500)  & (tv_dataset["startYear"] > 1970)]
-tv_dataset.sort_values("primaryTitle", inplace=True)
-tv_dataset.reset_index(drop=True, inplace=True)
+# tv_dataset = tv_dataset[(tv_dataset["numVotes"] > 7500)  & (tv_dataset["startYear"] > 1970)]
+# tv_dataset.sort_values("primaryTitle", inplace=True)
+# tv_dataset.reset_index(drop=True, inplace=True)
 
 
 
 
 # drop uneeded cols
-tv_dataset.drop(["Unnamed: 0", "originalTitle", "endYear", "genres", "directors", "writers", "isOriginalTitle", "languages"], axis=1, inplace=True)
+tv_dataset.drop(["originalTitle", "endYear", "genres", "directors", "writers", "isOriginalTitle", "languages"], axis=1, inplace=True)
 values = {'runtimeMinutes': np.mean(tv_dataset["runtimeMinutes"]),
           'storylines': "",
           'keywords': ""}
 # fill na values in each col with appropriate vals
 tv_dataset.fillna(value=values, inplace=True)
 
-@st.cache
+@st.cache(ttl=180)
 def load_module():
     module_url = "https://tfhub.dev/google/universal-sentence-encoder/4" #@param ["https://tfhub.dev/google/universal-sentence-encoder/4", "https://tfhub.dev/google/universal-sentence-encoder-large/5"]
     model = hub.load(module_url)
@@ -67,7 +67,7 @@ def load_module():
 
 model = load_module()
 
-@st.cache
+
 def embed(input):
     return model(input)
 
@@ -116,7 +116,7 @@ def similarity(index1, index2, df, verbose=False):
         print("similarity =", similarity_score)
     return similarity_score
 
-@st.cache
+@st.cache(ttl=180)
 def most_similar(index, df, verbose=False, amount=5):
     similarities = [similarity(index, j, df) for j in list(df.index)]
     df_sims = pd.DataFrame({"indices":range(0, len(similarities)), "similarities":similarities})
