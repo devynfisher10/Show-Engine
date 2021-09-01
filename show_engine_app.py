@@ -1,8 +1,6 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import tensorflow as tf
-import tensorflow_hub as hub
 
 # title for web app
 st.title('Tv Show Similarity Engine')
